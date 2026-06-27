@@ -3,6 +3,7 @@ import { FcGoogle } from 'react-icons/fc'
 import useAuth from '../../hooks/useAuth'
 import { toast } from 'react-hot-toast'
 import { TbFidgetSpinner } from 'react-icons/tb'
+import { imageUpload } from '../../api/utils'
 
 const SignUp = () => {
   const { createUser, updateUserProfile, signInWithGoogle, loading } = useAuth()
@@ -14,16 +15,17 @@ const SignUp = () => {
     const name = form.name.value
     const email = form.email.value
     const password = form.password.value
+     const image = form?.image?.files[0];
+
+     // image url response from imgbb
+     const imageUrl = await imageUpload(image);
 
     try {
       //2. User Registration
       const result = await createUser(email, password)
 
       //3. Save username & profile photo
-      await updateUserProfile(
-        name,
-        'https://lh3.googleusercontent.com/a/ACg8ocKUMU3XIX-JSUB80Gj_bYIWfYudpibgdwZE1xqmAGxHASgdvCZZ=s96-c'
-      )
+      await updateUserProfile(name, imageUrl);
       console.log(result)
 
       navigate('/')
@@ -52,7 +54,7 @@ const SignUp = () => {
       <div className='flex flex-col max-w-md p-6 rounded-md sm:p-10 bg-gray-100 text-gray-900'>
         <div className='mb-8 text-center'>
           <h1 className='my-3 text-4xl font-bold'>Sign Up</h1>
-          <p className='text-sm text-gray-400'>Welcome to PlantNet</p>
+          <p className='text-sm text-gray-400'>Welcome to PlantHub</p>
         </div>
         <form
           onSubmit={handleSubmit}
