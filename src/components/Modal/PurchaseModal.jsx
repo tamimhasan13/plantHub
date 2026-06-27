@@ -1,21 +1,60 @@
 import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react'
 import useAuth from '../../hooks/useAuth';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 const PurchaseModal = ({ closeModal, isOpen, plant }) => {
   const {user}=useAuth();
- const { name, category, quantity, price, _id } =plant || {};
+ const { name, category, quantity, price, _id, seller, image } = plant || {};
  const [selectedQuantity,setSelectedQuantity]=useState(1);
  const [totalPrice,setTotalPrice]=useState(price);
+ const [orderData,setOrderData]=useState({
+  customer:{
+        name:user?.displayName,
+        email:user?.email,
+        image:user?.photoURL
+  },
+  seller,
+  plantId:_id,
+  quantity:1,
+  price:price,
+  plantName:name,
+  plantCategory:category,
+  plantImage:image
+ })
+ useEffect(()=>{
+    setOrderData((prev) => {
+      return {
+        ...prev,
+        customer: {
+          name: user?.displayName,
+          email: user?.email,
+          image: user?.photoURL,
+        },
+      };
+    });
+ },[user])
  const handleQuantity=(value)=>{
   const totalQuantity=parseInt(value)
   
   if (totalQuantity > quantity) return toast.error("Quantity not available");
-  const calculatePrice=selectedQuantity*price;
+  const calculatePrice = totalQuantity * price;
   setSelectedQuantity(totalQuantity);
   setTotalPrice(calculatePrice)
+  setOrderData(prev=>{
+    return {
+      ...prev,
+      price:calculatePrice,
+      quantity:totalQuantity
+      
+    }
+
+  })
  }
+ const handleOrder=()=>{
+  console.log(orderData);
+ }
+ 
   return (
     <Dialog
       open={isOpen}
@@ -68,6 +107,9 @@ const PurchaseModal = ({ closeModal, isOpen, plant }) => {
             <div className="mt-2">
               <p className="text-sm text-gray-500">Total Price: {totalPrice}</p>
             </div>
+            <button onClick={handleOrder} className='px-2 py-1 bg-green-500'>
+              Order now
+            </button>
           </DialogPanel>
         </div>
       </div>
