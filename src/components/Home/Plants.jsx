@@ -2,9 +2,12 @@ import Card from "./Card";
 import Container from "../Shared/Container";
 import { useLoaderData } from "react-router";
 import EmptyState from "../Shared/EmptyState";
+import useAuth from "../../hooks/useAuth";
 
 const Plants = () => {
   const plants = useLoaderData();
+  const {user}=useAuth();
+  console.log(user)
   return (
     <Container>
       {plants && plants.length > 0 ? (
