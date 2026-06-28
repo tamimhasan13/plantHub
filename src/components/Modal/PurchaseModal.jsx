@@ -2,7 +2,12 @@ import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react'
 import useAuth from '../../hooks/useAuth';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements } from '@stripe/react-stripe-js';
+import CheckoutForm from '../Form/CheckoutForm';
+// Make sure to call `loadStripe` outside of a component’s render to avoid
+// recreating the `Stripe` object on every render.
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PK_KEY)
 const PurchaseModal = ({ closeModal, isOpen, plant }) => {
   const {user}=useAuth();
  const { name, category, quantity, price, _id, seller, image } = plant || {};
@@ -51,9 +56,7 @@ const PurchaseModal = ({ closeModal, isOpen, plant }) => {
 
   })
  }
- const handleOrder=()=>{
-  console.log(orderData);
- }
+ 
  
   return (
     <Dialog
@@ -97,7 +100,14 @@ const PurchaseModal = ({ closeModal, isOpen, plant }) => {
             <hr className="mt2" />
             <p>Oder Info</p>
             <div className="mt-2">
-              <input value={selectedQuantity} onChange={(e)=>handleQuantity(e.target.value)} type="number" min={1} max={quantity} className='border px-3 py-1' />
+              <input
+                value={selectedQuantity}
+                onChange={(e) => handleQuantity(e.target.value)}
+                type="number"
+                min={1}
+                max={quantity}
+                className="border px-3 py-1"
+              />
             </div>
             <div className="mt-2">
               <p className="text-sm text-gray-500">
@@ -107,9 +117,13 @@ const PurchaseModal = ({ closeModal, isOpen, plant }) => {
             <div className="mt-2">
               <p className="text-sm text-gray-500">Total Price: {totalPrice}</p>
             </div>
-            <button onClick={handleOrder} className='px-2 py-1 bg-green-500'>
-              Order now
-            </button>
+            <Elements stripe={stripePromise}>
+              <CheckoutForm
+                totalPrice={totalPrice}
+                closeModal={closeModal}
+                orderData={orderData}
+              />
+            </Elements>
           </DialogPanel>
         </div>
       </div>
